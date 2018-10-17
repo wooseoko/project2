@@ -33,5 +33,40 @@ float PID::get_control(point car_pose, point goal_pose){
      * implement pid algorithm
      *
     */
-    
+	float ctrl;
+/*    float cartogoal_size=sqrt(pow(goal_pose.x-car_pose.x,2)+pow(goal_pose.y-car_pose.y,2));
+    float heading_size=sqrt(pow(car_pose.x-pre_x,2)+pow(car_pose.y-pre_y,2));
+    float cartogoal_x=(goal_pose.x-car_pose.x)/cartogoal_size;
+    float cartogoal_y=(goal_pose.y-car_pose.y)/cartogoal_size;
+    float heading_x=(car_pose.x-pre_x)/heading_size;
+    float heading_y=(car_pose.y-pre_y)/heading_size;
+  */  
+
+	float angle_from_car_to_goal=atan2(goal_pose.y-car_pose.y,goal_pose.x-car_pose.x);
+	float heading_angle = atan2(car_pose.y-pre_y,car_pose.x-pre_x);
+	float pre_error=error;
+	error = angle_from_car_to_goal - heading_angle;
+	if(error<= -M_PI) error += 2*M_PI;
+	else if(error>=M_PI) error -= 2*M_PI;
+
+
+	if(sqrt(pow(car_pose.x-goal_pose.x,2)+pow(car_pose.y-goal_pose.y,2))<0.2) {
+        	error_sum=0;
+	}
+
+
+
+	error_sum += pre_error;
+	error_diff =  error - pre_error;
+
+	ctrl = Kp* error + Ki*error_sum + Kd*error_diff;  
+	if(ctrl>=3.0) ctrl=3.0;
+	else if(ctrl<=-3.0) ctrl=-3.0;
+
+	pre_x=car_pose.x;
+	pre_y=car_pose.y;
+	
+	return ctrl;
+
+
 }
