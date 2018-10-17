@@ -19,4 +19,6 @@ private:
     float Kp;
     float Ki;
     float Kd;
+    float pre_x;
+    float pre_y;
 };

@@ -197,14 +197,39 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
 
 
 }
+int rrtTree::randomState(double x_max, double x_min, double y_max, double y_min) {
 
-point rrtTree::randomState(double x_max, double x_min, double y_max, double y_min) {
-    //TODO
+    point rand;
+    rand.x=rand()%((int)x_max - (int)x_min)+x_min;
+    if(rand.x>x_max) rand.x=x_max;
+
+    rand.y=rand()%((int)y_max - (int)y_min)+y_min;
+    if(rand.y>y_max) rand.y=y_max;
+
+    rand.th=atan2(rand.y,rand.x);
+    return rand;
+    //TOOD
 }
 
 int rrtTree::nearestNeighbor(point x_rand, double MaxStep) {
-    //TOdO
+    double min_distance=100000000;
+    int index_min=-1;
+    for(int i=0;i<count;i++)
+    {
+        if(fabs(ptrTable[i]->location.th-x_rand.th)<=max_alpha)
+        {
+            double tmp=pow(x_rand.x-ptrTable[i]->location.x,2)+pow(x_rand.y-ptrTable[i].y,2);
+            if(tmp<min_distance)
+            {
+                min_distance=tmp;
+                index_min=i;
+            }
+        }
+    }
+    return index_min;
+    //TODO
 }
+
 
 int rrtTree::nearestNeighbor(point x_rand) {
     //TODO	
