@@ -182,7 +182,22 @@ int rrtTree::nearestNeighbor(point x_rand, double MaxStep) {
 }
 
 int rrtTree::nearestNeighbor(point x_rand) {
-    //TODO
+    //TODO	
+	int neighbor=0;
+	double shortest=pow(x_rand.x-ptrTable[0]->location.x,2)+pow(x_rand.y-ptrTable[0]->location.y,2);
+
+	for(int i=0;i<=count;i++)
+	{	
+		double tmp=pow(x_rand.x-ptrTable[i]->location.x,2)+pow(x_rand.y-ptrTable[i]->location.y,2);
+		if(tmp<shortest)
+		{
+			shortest=tmp;
+			neighbor=i;
+		}
+		
+
+	}	
+	return neighbor;
 }
 
 int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep) {
