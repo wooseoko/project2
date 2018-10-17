@@ -159,18 +159,43 @@ void rrtTree::visualizeTree(std::vector<traj> path){
             cv::line(imgResult, x1, x2, cv::Scalar(255, 0, 0), thickness, lineType);
 	    }
     }
-    cv::namedWindow("Mapping");
+er  cv::namedpWindow("Mapping");
     cv::Rect imgROI((int)Res*200,(int)Res*200,(int)Res*400,(int)Res*400);
     cv::imshow("Mapping", imgResult(imgROI));
     cv::waitKey(1);
 }
 
 void rrtTree::addVertex(point x_new, point x_rand, int idx_near, double alpha, double d) {
+
     //TODO
+        ptrTable[count] = new node;
+        ptrTable[count]->idx = count;
+    ptrTable[count]->idx_parent = idx_near;
+    ptrTable[count]->location= x_new;
+    ptrTable[count]->rand = x_rand;
+    ptrTable[count]->alpha = alpha;
+        ptrTable[count]->d = d;
+        count++;
+
+
 }
 
 int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min, int K, double MaxStep) {
     //TODO
+        wolrd_x_max = x_max;
+        wolrd_x_min = x_min;
+        wolrd_y_max = y_max;
+        wolrd_y_min = y_min;
+        for(int i=0; i<K; i++){
+                point x_rand = randomState(x_max, x_min, y_max, y_min);
+                int idx_near = nearestNeighbor(x_rand, MaxStep);
+                point x_new = newState(idx_near, x_rand, MaxStep);
+                alpha = ??
+                d = ??
+                this->addVertex(x_new, x_rand, idx_near, alpha, d);
+        }
+
+
 }
 
 point rrtTree::randomState(double x_max, double x_min, double y_max, double y_min) {
@@ -178,7 +203,7 @@ point rrtTree::randomState(double x_max, double x_min, double y_max, double y_mi
 }
 
 int rrtTree::nearestNeighbor(point x_rand, double MaxStep) {
-    //TODO
+    //TOdO
 }
 
 int rrtTree::nearestNeighbor(point x_rand) {
