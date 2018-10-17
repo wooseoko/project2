@@ -12,12 +12,15 @@ PID::PID(){
      *
     */
 
-    error = 0;
-    error_sum = 0;
-    error_diff = 0;
-    Kp = 1.5;
-    Ki = 0;
-    Kd = 5; 
+	Kp=2.0;
+	Ki=0.005;
+	Kd=10;
+	error = 0.0;
+	error_sum = 0.0;
+	error_diff = 0.0;
+	pre_x=0.0;
+	pre_y=0.0;	
+
 }
 
 void PID::reset() {
