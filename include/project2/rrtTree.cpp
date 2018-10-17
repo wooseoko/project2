@@ -250,9 +250,76 @@ int rrtTree::nearestNeighbor(point x_rand) {
 	return neighbor;
 }
 
+
 int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep) {
+
     //TODO
+        int n=5;
+        double *alpha = new double[n];
+        double *d = new double[n];
+        double *R = new double[n];
+        double *x_c = new double[n];
+        double *y_c = new double[n];
+        double *x_ = new double[n];
+        double *y_ = new double[n];
+        double *th_ = new double[n];
+
+
+        for(int i=0;i<n;i++){
+                alpha[i] =( ((double)rand()/RAND_MAX)*2-1 )*max_alpha;
+                d[i] = ( ((double)rand()/RAND_MAX)*2-1 )*MaxStep;
+                R[i] = L/tan(alpha[i]);
+                x_c[i] = x_near.x - R[i]*sin(x_near.th);
+                y_c[i] = x_near.y + R[i]*cos(x_near.th);
+                x_[i] = x_c[i] + R[i]*sin(x_near.th + d[i]/R[i]);
+                y_[i] = y_c[i] - R[i]*cos(x_near.th + d[i]/R[i]);
+                th_[i] = x_near.th + d[i]/R[i];
+        }
+
+
+        double d2 = (x_rand.x-x_[0])*(x_rand.x-x_[0]) + (x_rand.y-y_[0])*(x_rand.y-y_[0]);
+        int optimal = 0;
+        for(int i=1;i<n;i++){
+                double tmp = (x_rand.x-x_[i])*(x_rand.x-x_[i]) + (x_rand.y-y_[i])*(x_rand.y-y_[i]);
+                if(tmp < d2){
+                        d2 = tmp;
+                        optimal = i;
+                }
+        }
+        out[0] = x_[optimal];
+        out[1] = y_[optimal];
+        out[2] = th_[optimal];
+        out[3] = alpha[optimal];
+        out[4] = d[optimal];
+        point x_new;
+        x_new.x = x_[optimal];
+        x_new.y = x_[optimal];
+        x_new.th = x_[optimal];
+        if(isCollision(x_near, x_new, d[optimal], R[optimal])){
+                delete [] alpha;
+                delete [] d;
+                delete [] R;
+                delete [] x_c;
+                delete [] y_c;
+                delete [] x_;
+                delete [] y_;
+                delete [] th_
+                return 0;
+        }
+        else{
+                delete [] alpha;
+                delete [] d;
+                delete [] R;
+                delete [] x_c;
+                delete [] y_c;
+                delete [] x_;
+                delete [] y_;
+                delete [] th_
+                return 1;
+        }
+
 }
+
 
 bool rrtTree::isCollision(point x1, point x2, double d, double R) {
     //TODO
