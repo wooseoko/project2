@@ -323,6 +323,28 @@ int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep)
 
 bool rrtTree::isCollision(point x1, point x2, double d, double R) {
     //TODO
+	double alpha = atan(L/R);
+	double x_center = x1.x-R*sin(x1.th);
+	double y_center = x1.y+R*cos(x1.th);
+	double beta = d/R;
+	bool result = true;
+	int x_origin = ;
+	int y_origin = ;
+	for (int n=1;n<=5;n++)
+	{
+		double x_path=x_center+R*sin(x1.th+beta/5*n);
+		double y_path=y_center-R*cos(x1.th+beta/5*n);
+		
+		for(int i=-32;i<33;i++)
+		{
+			for(int j=-32;j<33;j++)
+			{
+				result &= map_margin.at<uchar>(i+x_path/0.05+x_origin, j+y_path/0.05+y_origin);
+			}
+		}
+	}
+
+	return result
 }
 
 std::vector<traj> rrtTree::backtracking_traj(){
