@@ -182,15 +182,11 @@ void rrtTree::addVertex(point x_new, point x_rand, int idx_near, double alpha, d
 
 int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min, int K, double MaxStep) {
     //TODO
-        world_x_max = x_max;
-        world_x_min = x_min;
-        world_y_max = y_max;
-        world_y_min = y_min;
         for(int i=0; i<K; i++){
                 point x_rand = randomState(x_max, x_min, y_max, y_min);
                 int idx_near = nearestNeighbor(x_rand, MaxStep);
-		double *out = new double[5];
-                if(randompath(out, idx_near, x_rand, MaxStep)){
+		double out[5];
+                if(randompath(out, ptrTable[idx_near]->location, x_rand, MaxStep)){
 		point x_new;
 		x_new.x = out[0];
 		x_new.y = out[1];
@@ -206,15 +202,15 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
 }
 point rrtTree::randomState(double x_max, double x_min, double y_max, double y_min) {
 
-    point rand;
-    rand.x=rand()%((int)x_max - (int)x_min)+x_min;
-    if(rand.x>x_max) rand.x=x_max;
+    point random;
+    random.x=rand()%((int)x_max - (int)x_min)+x_min;
+    if(random.x>x_max) random.x=x_max;
 
-    rand.y=rand()%((int)y_max - (int)y_min)+y_min;
-    if(rand.y>y_max) rand.y=y_max;
+    random.y=rand()%((int)y_max - (int)y_min)+y_min;
+    if(random.y>y_max) random.y=y_max;
 
-    rand.th=atan2(rand.y,rand.x);
-    return rand;
+    random.th=atan2(random.y,random.x);
+    return random;
     //TOOD
 }
 
@@ -346,12 +342,12 @@ bool rrtTree::isCollision(point x1, point x2, double d, double R) {
 		{
 			for(int j=-32;j<33;j++)
 			{
-				result &= cv::map_margin.at<uchar>(i+x_path/0.05+x_origin, j+y_path/0.05+y_origin);
+				//result &= cv::Mat map_margin.at<uchar>(i+x_path/0.05+x_origin, j+y_path/0.05+y_origin);
 			}
 		}
 	}
 
-	return result;
+	return 0;
 }
 
 std::vector<traj> rrtTree::backtracking_traj(){

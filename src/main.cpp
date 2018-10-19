@@ -243,9 +243,9 @@ int main(int argc, char** argv){
 		    i++;
 		}
 		point path_now;
-		path_now.x = path.RRT[i].x;
-                path_now.y = path.RRT[i].y;
-                path_now.th = path.RRT[i].th;
+		path_now.x = path_RRT[i].x;
+                path_now.y = path_RRT[i].y;
+                path_now.th = path_RRT[i].th;
 
 		float ctrl = pid_ctrl.get_control(robot_pose,path_now);
 
