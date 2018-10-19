@@ -44,6 +44,7 @@ std::vector<traj> path_RRT;
 //control
 //std::vector<control> control_RRT;
 
+
 //robot
 point robot_pose;
 ackermann_msgs::AckermannDriveStamped cmd;
@@ -265,6 +266,7 @@ int main(int argc, char** argv){
 
 void generate_path_RRT()
 {
+	
     /*
      * 1. for loop
      * 2.  call RRT generate function in order to make a path which connects i way point to i+1 way point.
@@ -272,6 +274,11 @@ void generate_path_RRT()
      * 4.  when you store path, you have to reverse the order of points in the generated path since BACKTRACKING makes a path in a reverse order (goal -> start).
      * 5. end
      */
+	for(int i=0; i<N; i++){
+		
+
+
+	}
 }
 
 void set_waypoints()
