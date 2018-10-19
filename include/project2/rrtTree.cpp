@@ -189,10 +189,17 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
         for(int i=0; i<K; i++){
                 point x_rand = randomState(x_max, x_min, y_max, y_min);
                 int idx_near = nearestNeighbor(x_rand, MaxStep);
-                point x_new = newState(idx_near, x_rand, MaxStep);
-                alpha = ??
-                d = ??
+		double out = new out[5];
+                if(randompath(out, idx_near, x_rand, MaxStep)){
+		point x_new;
+		x_new.x = out[0];
+		x_new.y = out[1];
+		x_new.th = out[2];
+                alpha = out[3];
+                d = out[4];
                 this->addVertex(x_new, x_rand, idx_near, alpha, d);
+		}
+		delete [] out;
         }
 
 
