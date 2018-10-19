@@ -159,7 +159,7 @@ void rrtTree::visualizeTree(std::vector<traj> path){
             cv::line(imgResult, x1, x2, cv::Scalar(255, 0, 0), thickness, lineType);
 	    }
     }
-    cv::namedpWindow("Mapping");
+    cv::namedWindow("Mapping");
     cv::Rect imgROI((int)Res*200,(int)Res*200,(int)Res*400,(int)Res*400);
     cv::imshow("Mapping", imgResult(imgROI));
     cv::waitKey(1);
@@ -182,29 +182,29 @@ void rrtTree::addVertex(point x_new, point x_rand, int idx_near, double alpha, d
 
 int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min, int K, double MaxStep) {
     //TODO
-        wolrd_x_max = x_max;
-        wolrd_x_min = x_min;
-        wolrd_y_max = y_max;
-        wolrd_y_min = y_min;
+        world_x_max = x_max;
+        world_x_min = x_min;
+        world_y_max = y_max;
+        world_y_min = y_min;
         for(int i=0; i<K; i++){
                 point x_rand = randomState(x_max, x_min, y_max, y_min);
                 int idx_near = nearestNeighbor(x_rand, MaxStep);
-		double out = new out[5];
+		double *out = new double[5];
                 if(randompath(out, idx_near, x_rand, MaxStep)){
 		point x_new;
 		x_new.x = out[0];
 		x_new.y = out[1];
 		x_new.th = out[2];
-                alpha = out[3];
-                d = out[4];
+                double alpha = out[3];
+                double d = out[4];
                 this->addVertex(x_new, x_rand, idx_near, alpha, d);
 		}
 		delete [] out;
         }
-
+	return 0;
 
 }
-int rrtTree::randomState(double x_max, double x_min, double y_max, double y_min) {
+point rrtTree::randomState(double x_max, double x_min, double y_max, double y_min) {
 
     point rand;
     rand.x=rand()%((int)x_max - (int)x_min)+x_min;
@@ -225,7 +225,7 @@ int rrtTree::nearestNeighbor(point x_rand, double MaxStep) {
     {
         if(fabs(ptrTable[i]->location.th-x_rand.th)<=max_alpha)
         {
-            double tmp=pow(x_rand.x-ptrTable[i]->location.x,2)+pow(x_rand.y-ptrTable[i].y,2);
+            double tmp=pow(x_rand.x-ptrTable[i]->location.x,2)+pow(x_rand.y-ptrTable[i]->location.y,2);
             if(tmp<min_distance)
             {
                 min_distance=tmp;
@@ -310,7 +310,7 @@ int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep)
                 delete [] y_c;
                 delete [] x_;
                 delete [] y_;
-                delete [] th_
+                delete [] th_;
                 return 0;
         }
         else{
@@ -321,7 +321,7 @@ int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep)
                 delete [] y_c;
                 delete [] x_;
                 delete [] y_;
-                delete [] th_
+                delete [] th_;
                 return 1;
         }
 
@@ -346,12 +346,12 @@ bool rrtTree::isCollision(point x1, point x2, double d, double R) {
 		{
 			for(int j=-32;j<33;j++)
 			{
-				result &= map_margin.at<uchar>(i+x_path/0.05+x_origin, j+y_path/0.05+y_origin);
+				result &= cv::map_margin.at<uchar>(i+x_path/0.05+x_origin, j+y_path/0.05+y_origin);
 			}
 		}
 	}
 
-	return result
+	return result;
 }
 
 std::vector<traj> rrtTree::backtracking_traj(){
