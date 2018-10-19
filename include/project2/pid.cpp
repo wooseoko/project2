@@ -54,7 +54,7 @@ float PID::get_control(point car_pose, point goal_pose){
 
 
 	if(sqrt(pow(car_pose.x-goal_pose.x,2)+pow(car_pose.y-goal_pose.y,2))<0.2) {
-        	error_sum=0;
+        	reset();
 	}
 
 
