@@ -31,8 +31,8 @@ double world_y_max;
 
 //parameters we should adjust : K, margin, MaxStep
 int margin = 15;
-int K = 1500;
-double MaxStep = 4;
+int K = 3000;
+double MaxStep = 8;
 
 //way points
 std::vector<point> waypoints;
@@ -79,8 +79,10 @@ int main(int argc, char** argv){
 
     map_y_range = map.cols;
     map_x_range = map.rows;
+    printf("map_x_range %d map_y_rage %d\n",map_x_range,map_y_range);
     map_origin_x = map_x_range/2.0 - 0.5;
     map_origin_y = map_y_range/2.0 - 0.5;
+    printf("map_origin_x %f map_origin_y %f\n", map_origin_x, map_origin_y);
     world_x_min = -10.0;
     world_x_max = 10.0;
     world_y_min = -10.0;
@@ -235,22 +237,28 @@ int main(int argc, char** argv){
         } break;
 
         case RUNNING: {
+	    printf("Running start \n");
 	    PID pid_ctrl;
 	    int i=0;
+	    printf("Running PID \n");
 	    while(1)
 	    {
-		if(pow(path_RRT[i].x-robot_pose.x,2)+pow(path_RRT[i].y-robot_pose.y,2)<pow(0.2,2)) {
-		    i++;
-		}
+		printf("start while & i : %d\n",i);
+		printf("look_ahead_idx %d",look_ahead_idx);
+		printf(" path x , y , th %2f, %2f, %2f \n", path_RRT[i].x,path_RRT[i].y,path_RRT[i].th);
+		printf("robot pose x, y, th %2f, %2f, %2f\n",robot_pose.x,robot_pose.y,robot_pose.th);
 		point path_now;
 		path_now.x = path_RRT[i].x;
                 path_now.y = path_RRT[i].y;
                 path_now.th = path_RRT[i].th;
 
 		float ctrl = pid_ctrl.get_control(robot_pose,path_now);
-
-		setcmdvel(1.0,ctrl);
-
+		float speed=2.0;
+		float max_steering = (0.45/speed + 0.25 < 1.18)? 0.45/speed + 0.25 : 1.18;
+		float steering = ctrl*max_steering/3;
+		printf("ctrl %f \n", steering);
+		setcmdvel(speed,steering);
+		cmd_vel_pub.publish(cmd);
 		if(pow(path_RRT[i].x-robot_pose.x,2)+pow(path_RRT[i].y-robot_pose.y,2)<pow(0.2,2)) {
 		    i++;
 		}
@@ -278,6 +286,7 @@ int main(int argc, char** argv){
         } break;
 
         case FINISH: {
+	    printf("FINISH \n");
             setcmdvel(0,0);
             cmd_vel_pub.publish(cmd);
             running = false;
@@ -286,6 +295,7 @@ int main(int argc, char** argv){
         } break;
 
         default: {
+		printf("default\n");
         } break;
         }
     }
@@ -302,23 +312,25 @@ void generate_path_RRT()
      * 4.  when you store path, you have to reverse the order of points in the generated path since BACKTRACKING makes a path in a reverse order (goal -> start).
      * 5. end
     */
-	for(int i=0; i<waypoints.size(); i++){
+	for(int i=0; i<waypoints.size()-1; i++){
 		printf("start %d\n",i);
-		rrtTree tree = rrtTree(waypoints[i], waypoints[i+1], map, map_origin_x, map_origin_y, res, margin);
+		rrtTree *tree = new rrtTree(waypoints[i], waypoints[i+1], map, map_origin_x, map_origin_y, res, margin);
 		printf("rrtTree %d\n",i);
-		tree.generateRRT(world_x_max, world_x_min, world_y_max, world_y_min, K, MaxStep);
+		tree->generateRRT(world_x_max, world_x_min, world_y_max, world_y_min, K, MaxStep);
 		printf("generateRRT %d\n",i);
-		tree.visualizeTree();
+		tree->visualizeTree();
 		printf("tree.visualizeTree %d\n",i);
-		std::vector<traj> vec = tree.backtracking_traj();
+		std::vector<traj> vec = tree->backtracking_traj();
 		printf("backtracking_traj %d\n",i);
 		std::reverse(vec.begin(),vec.end());
 		printf("reverse, begin, end %d\n",i);
-		tree.visualizeTree(vec);
+		tree->visualizeTree(vec);
 		printf("visualizeTree %d\n",i);
-		path_RRT.insert(path_RRT.end(),vec.begin(), vec.end());
+		for(int j=0; j<vec.size();j++)
+			path_RRT.push_back(vec[j]);
 		printf("path_RRT_insert %d\n",i); 
 		printf("waypointssize %d\n",waypoints.size());
+		delete tree;
 	}
 }
 
