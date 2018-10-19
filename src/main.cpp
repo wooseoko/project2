@@ -234,6 +234,30 @@ int main(int argc, char** argv){
         } break;
 
         case RUNNING: {
+	    PID pid_ctrl;
+	    int i=0;
+	    while(1)
+	    {
+		if(pow(path_RRT[i].x-robot_pose.x,2)+pow(path_RRT[i].y-robot_pose.y)<pow(0.2,2)) {
+		    i++;
+		}
+
+		float ctrl = pid_ctrl.get_control(robot_pose,path_RRT[i]);
+
+		setcmdvel(1.0,ctrl);
+
+		if(pow(path_RRT[i].x-robot_pose.x,2)+pow(path_RRT[i].y-robot_pose.y)<pow(0.2,2)) {
+		    i++;
+		}
+
+		if(pow(waypoints[look_ahead_idx].x-robot_pose.x,2)+pow(waypoints[look_ahead_idx].y-robot_pose.y,2)<pow(0.2,2)) look_ahead_idx++;
+
+		if(look_ahead_idx==waypoints.size())
+		{
+		    state=FINISH;
+		    break;
+		}
+	    }
 	    //TODO
 	    /*
 		1. make control following point in the variable "path_RRT"
