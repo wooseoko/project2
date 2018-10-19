@@ -273,11 +273,15 @@ void generate_path_RRT()
      * 3.  store path to variable "path_RRT"
      * 4.  when you store path, you have to reverse the order of points in the generated path since BACKTRACKING makes a path in a reverse order (goal -> start).
      * 5. end
-     */
-	for(int i=0; i<N; i++){
-		
-
-
+    */
+	for(int i=0; i<waypoints.size(); i++){
+		rrtTree tree = rrtTree(waypoints[i], waypoints[i+1], map, map_origin_x, map_origin_y, res, margin);
+		tree.generateRRT(world_x_max, world_x_min, world_y_max, world_y_min, K, MaxStep);
+		tree.visualizeTree();
+		std::vector<traj> vec = tree.backtracking_traj();
+		vec.reverse(vec.begin(),vec.end());
+		tree.visualizeTree(vec);
+		path_RRT.insert(path_RRT.end(),vec.begin(), vec.end()); 
 	}
 }
 
