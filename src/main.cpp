@@ -243,10 +243,10 @@ int main(int argc, char** argv){
 	    printf("Running PID \n");
 	    while(1)
 	    {
-		printf("start while & i : %d\n",i);
-		printf("look_ahead_idx %d",look_ahead_idx);
-		printf(" path x , y , th %2f, %2f, %2f \n", path_RRT[i].x,path_RRT[i].y,path_RRT[i].th);
-		printf("robot pose x, y, th %2f, %2f, %2f\n",robot_pose.x,robot_pose.y,robot_pose.th);
+/*		printf("start while & i : %d\n",i);
+//		printf("look_ahead_idx %d",look_ahead_idx);
+//		printf(" path x , y , th %2f, %2f, %2f \n", path_RRT[i].x,path_RRT[i].y,path_RRT[i].th);
+		printf("robot pose x, y, th %2f, %2f, %2f\n",robot_pose.x,robot_pose.y,robot_pose.th);*/
 		point path_now;
 		path_now.x = path_RRT[i].x;
                 path_now.y = path_RRT[i].y;
@@ -256,7 +256,9 @@ int main(int argc, char** argv){
 		float speed=2.0;
 		float max_steering = (0.45/speed + 0.25 < 1.18)? 0.45/speed + 0.25 : 1.18;
 		float steering = ctrl*max_steering/3;
-		printf("ctrl %f \n", steering);
+//		printf("ctrl %f \n", steering);
+		printf("error , error_sum , error_diff :  %.2f  %.2f  %.2f \n",pid_ctrl.error,pid_ctrl.error_diff,pid_ctrl.error_sum  );
+		printf("path_RRT[i].x , y %.2f  %.2f \n ", path_RRT[i].x,path_RRT[i].y);
 		setcmdvel(speed,steering);
 		cmd_vel_pub.publish(cmd);
 		if(pow(path_RRT[i].x-robot_pose.x,2)+pow(path_RRT[i].y-robot_pose.y,2)<pow(0.2,2)) {
@@ -312,6 +314,7 @@ void generate_path_RRT()
      * 4.  when you store path, you have to reverse the order of points in the generated path since BACKTRACKING makes a path in a reverse order (goal -> start).
      * 5. end
     */
+	printf("RRT\n");
 	for(int i=0; i<waypoints.size()-1; i++){
 		printf("start %d\n",i);
 		rrtTree *tree = new rrtTree(waypoints[i], waypoints[i+1], map, map_origin_x, map_origin_y, res, margin);
