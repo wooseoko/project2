@@ -239,15 +239,19 @@ int main(int argc, char** argv){
 	    int i=0;
 	    while(1)
 	    {
-		if(pow(path_RRT[i].x-robot_pose.x,2)+pow(path_RRT[i].y-robot_pose.y)<pow(0.2,2)) {
+		if(pow(path_RRT[i].x-robot_pose.x,2)+pow(path_RRT[i].y-robot_pose.y,2)<pow(0.2,2)) {
 		    i++;
 		}
+		point path_now;
+		path_now.x = path.RRT[i].x;
+                path_now.y = path.RRT[i].y;
+                path_now.th = path.RRT[i].th;
 
-		float ctrl = pid_ctrl.get_control(robot_pose,path_RRT[i]);
+		float ctrl = pid_ctrl.get_control(robot_pose,path_now);
 
 		setcmdvel(1.0,ctrl);
 
-		if(pow(path_RRT[i].x-robot_pose.x,2)+pow(path_RRT[i].y-robot_pose.y)<pow(0.2,2)) {
+		if(pow(path_RRT[i].x-robot_pose.x,2)+pow(path_RRT[i].y-robot_pose.y,2)<pow(0.2,2)) {
 		    i++;
 		}
 
@@ -303,7 +307,7 @@ void generate_path_RRT()
 		tree.generateRRT(world_x_max, world_x_min, world_y_max, world_y_min, K, MaxStep);
 		tree.visualizeTree();
 		std::vector<traj> vec = tree.backtracking_traj();
-		vec.reverse(vec.begin(),vec.end());
+		std::reverse(vec.begin(),vec.end());
 		tree.visualizeTree(vec);
 		path_RRT.insert(path_RRT.end(),vec.begin(), vec.end()); 
 	}
