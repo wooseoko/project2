@@ -303,13 +303,22 @@ void generate_path_RRT()
      * 5. end
     */
 	for(int i=0; i<waypoints.size(); i++){
+		printf("start %d\n",i);
 		rrtTree tree = rrtTree(waypoints[i], waypoints[i+1], map, map_origin_x, map_origin_y, res, margin);
+		printf("rrtTree %d\n",i);
 		tree.generateRRT(world_x_max, world_x_min, world_y_max, world_y_min, K, MaxStep);
+		printf("generateRRT %d\n",i);
 		tree.visualizeTree();
+		printf("tree.visualizeTree %d\n",i);
 		std::vector<traj> vec = tree.backtracking_traj();
+		printf("backtracking_traj %d\n",i);
 		std::reverse(vec.begin(),vec.end());
+		printf("reverse, begin, end %d\n",i);
 		tree.visualizeTree(vec);
-		path_RRT.insert(path_RRT.end(),vec.begin(), vec.end()); 
+		printf("visualizeTree %d\n",i);
+		path_RRT.insert(path_RRT.end(),vec.begin(), vec.end());
+		printf("path_RRT_insert %d\n",i); 
+		printf("waypointssize %d\n",waypoints.size());
 	}
 }
 
