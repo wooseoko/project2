@@ -356,4 +356,27 @@ bool rrtTree::isCollision(point x1, point x2, double d, double R) {
 
 std::vector<traj> rrtTree::backtracking_traj(){
     //TODO
+	int near_goal = nearestNeighbor(x_goal);
+	std::vector<traj> path;
+	traj nearG;
+	nearG.x =  ptrTable[near_goal]->location.x;
+        nearG.y =  ptrTable[near_goal]->location.y;
+        nearG.th =  ptrTable[near_goal]->location.th;
+        nearG.alpha =  ptrTable[near_goal]->alpha;
+        nearG.d =  ptrTable[near_goal]->d;
+
+	path.push_back(nearG);
+	int now = near_goal;
+	while(now!=0){
+		traj trj;
+		int prt = ptrTable[now]->idx_parent;
+		trj.x = ptrTable[prt]->location.x;
+		trj.y = ptrTable[prt]->location.y; 
+		trj.th = ptrTable[prt]->location.th; 
+		trj.alpha = ptrTable[prt]->alpha; 
+		trj.d = ptrTable[prt]->d;
+		path.push_back(trj);
+		now = prt;
+	}
+	return path;
 }
