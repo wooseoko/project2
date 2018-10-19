@@ -335,8 +335,8 @@ bool rrtTree::isCollision(point x1, point x2, double d, double R) {
 	double y_center = x1.y+R*cos(x1.th);
 	double beta = d/R;
 	bool result = true;
-	int x_origin = ;
-	int y_origin = ;
+	int x_origin = int(map_origin_x/0.05);
+	int y_origin = int(map_origin_y/0.05);
 	for (int n=1;n<=5;n++)
 	{
 		double x_path=x_center+R*sin(x1.th+beta/5*n);
