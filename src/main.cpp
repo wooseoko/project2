@@ -33,8 +33,8 @@ double world_y_max;
 
 //parameters we should adjust : K, margin, MaxStep
 int margin = 15;
-int K = 3000;
-double MaxStep = 4;
+int K = 10000;
+double MaxStep = 2;
 
 //way points
 std::vector<point> waypoints;
@@ -266,9 +266,8 @@ int main(int argc, char** argv){
 		if(pow(path_RRT[i].x-robot_pose.x,2)+pow(path_RRT[i].y-robot_pose.y,2)<pow(0.2,2)) {
 		    i++;
 		}
-
+		printf("look_ahead_idx %d\n",look_ahead_idx); 
 		if(pow(waypoints[look_ahead_idx].x-robot_pose.x,2)+pow(waypoints[look_ahead_idx].y-robot_pose.y,2)<pow(0.2,2)) look_ahead_idx++;
-
 		if(look_ahead_idx==waypoints.size())
 		{
 		    state=FINISH;
@@ -322,18 +321,19 @@ void generate_path_RRT()
      * 5. end
     */
 	printf("RRT\n");
-	double lastth=0;
+	point lastp=waypoints[0];
 	for(int i=0; i<waypoints.size()-1; i++){
 		printf("start %d\n",i);
-		waypoints[i].th = lastth;
-		rrtTree *tree = new rrtTree(waypoints[i], waypoints[i+1], map, map_origin_x, map_origin_y, res, margin);
+		rrtTree *tree = new rrtTree(lastp, waypoints[i+1], map, map_origin_x, map_origin_y, res, margin);
 		printf("rrtTree %d\n",i);
 		tree->generateRRT(world_x_max, world_x_min, world_y_max, world_y_min, K, MaxStep);
 		printf("generateRRT %d\n",i);
 		tree->visualizeTree();
 		printf("tree.visualizeTree %d\n",i);
 		std::vector<traj> vec = tree->backtracking_traj();
-		lastth = vec.begin()->th;
+		lastp.x = vec.begin()->x;
+		lastp.y = vec.begin()->y;
+		lastp.th = vec.begin()->th;
 		printf("backtracking_traj %d\n",i);
 		std::reverse(vec.begin(),vec.end());
 		printf("reverse, begin, end %d\n",i);

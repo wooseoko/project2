@@ -12,8 +12,8 @@ PID::PID(){
      *
     */
 
-	Kp=2.0;
-	Ki=0.005;
+	Kp=2.5;
+	Ki=0.008;
 	Kd=10;
 //	Ki=0;	Kd=0;
 	error = 0.0;
@@ -70,7 +70,7 @@ float PID::get_control(point car_pose, point goal_pose){
 
 	pre_x=car_pose.x;
 	pre_y=car_pose.y;
-	
+	printf(" ctrl %.2f\n\n",ctrl);
 	return ctrl;
 
 

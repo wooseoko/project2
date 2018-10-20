@@ -26,6 +26,7 @@ rrtTree::rrtTree(point x_init, point x_goal) {
     root->rand = x_init;
     root->alpha = 0;
     root->d = 0;
+    root->cnt=0;
 }
 
 rrtTree::~rrtTree(){
@@ -175,6 +176,7 @@ void rrtTree::addVertex(point x_new, point x_rand, int idx_near, double alpha, d
     ptrTable[count]->rand = x_rand;
     ptrTable[count]->alpha = alpha;
         ptrTable[count]->d = d;
+	ptrTable[count]->cnt = 0;
         count++;
 
 
@@ -183,10 +185,10 @@ void rrtTree::addVertex(point x_new, point x_rand, int idx_near, double alpha, d
 int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min, int K, double MaxStep) {
     //TODO
         for(int i=0; i<K; i++){	
+		if(!(i%100)) printf("i : %d \n ", i );
 		if(pow(ptrTable[count-1]->location.x-x_goal.x,2)+pow(ptrTable[count-1]->location.y-x_goal.y,2)<pow(0.2,2)) break;
 		int passed=0;
-		while(!passed){
-		printf("i : %d\n",i);
+//		printf("i : %d\n",i);
                 point x_rand = randomState(x_max, x_min, y_max, y_min);
 //		printf("randomState : %d\n",i);
                 int idx_near = nearestNeighbor(x_rand,MaxStep);
@@ -194,10 +196,13 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
 		double out[5];
 //		printf("double out[5]\n");
 //		printf("%d \n",idx_near);
+		
+		while(!passed) {
 		if(idx_near!=-1) {
                 if(randompath(out, ptrTable[idx_near]->location, x_rand, MaxStep)){
 //		printf("randompath : %d\n",i);
 		point x_new;
+		ptrTable[idx_near]->cnt=0;
 		x_new.x = out[0];
 		x_new.y = out[1];
 		x_new.th = out[2];
@@ -209,10 +214,20 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
 		}
 		else
 		{
-		     if(idx_near==0) passed=1;
-		     idx_near = ptrTable[idx_near]->idx_parent;
-		//     printf("idx_near %d\n",idx_near);
+		    ptrTable[idx_near]->cnt++;
+		    if(idx_near==0) {
+			idx_near=rand()%count;	
+			break;
+		    }
+		    if(ptrTable[idx_near]->cnt>=4)
+		    {
+			idx_near=ptrTable[idx_near]->idx_parent;
+//		        ptrTable[idx_near]->location.x = 10000000;
+//			ptrTable[idx_near]->location.y = 10000000;
+		    }
 		}
+		if(!idx_near)idx_near = ptrTable[idx_near]->idx_parent;
+		//     printf("idx_near %d\n",idx_near);
 		}
 		else break;
 	    }
@@ -246,7 +261,8 @@ int rrtTree::nearestNeighbor(point x_rand, double MaxStep) {
 	double x_c2 = ptrTable[i]->location.x-R*sin(ptrTable[i]->location.th);
 	double y_c2 = ptrTable[i]->location.y+R*sin(ptrTable[i]->location.th);
 //	if(fabs( ptrTable[i]->location.th - atan2(ptrTable[i]->location.y-x_rand.y,ptrTable[i]->location.x-x_rand.x)      )<=2*max_alpha   )        {
-	if( fabs( ptrTable[i]->location.th - atan2(ptrTable[i]->location.y-x_rand.y,ptrTable[i]->location.x-x_rand.x))<1.57 ) {
+//	if( fabs( ptrTable[i]->location.th - atan2(ptrTable[i]->location.y-x_rand.y,ptrTable[i]->location.x-x_rand.x))<1.57 ) {
+	if(pow(x_c1-x_rand.x,2)+pow(y_c1-x_rand.y,2) > pow(R,2) && pow(x_c2-x_rand.x,2) + pow(y_c2-x_rand.y,2) > pow(R,2)) {
             double tmp=pow(x_rand.x-ptrTable[i]->location.x,2)+pow(x_rand.y-ptrTable[i]->location.y,2);
             if(tmp<min_distance)
             {
@@ -281,9 +297,10 @@ int rrtTree::nearestNeighbor(point x_rand) {
 
 
 int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep) {
-	printf("randompath start! \n");
+	
+//	printf("randompath start! \n");
     //TODO
-        int n=3;
+        int n=10;
         double *alpha = new double[n];
         double *d = new double[n];
         double *R = new double[n];
@@ -293,13 +310,14 @@ int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep)
         double *y_ = new double[n];
         double *th_ = new double[n];
 	point *p = new point[n];
-	printf("after allocation \n");
+//	printf("after allocation \n");
 
         for(int i=0;i<n;i++){
-		printf("i : %d\n",i);
-                alpha[i] =( ((double)rand()/RAND_MAX)*2-1 )*max_alpha;
-                d[i] = ( (fabs((double)rand()/RAND_MAX))*0.6+0.4 )*MaxStep;
- 		if(count %5==0) d[i]=0;
+//		printf("i : %d\n",i);
+	        alpha[i] =( ((double)rand()/RAND_MAX)*2-1 )*max_alpha;
+                d[i] = ( (fabs((double)rand()/RAND_MAX))*0.5+0.5 )*MaxStep;
+//                if(i%10==0) d[i] = MaxStep;
+ 	//	if(count %5==0) d[i]=0;
 
                 R[i] = L/tan(alpha[i]);
                 x_c[i] = x_near.x - R[i]*sin(x_near.th);
@@ -324,12 +342,28 @@ int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep)
                 }
 		}
         }
-	printf("out allocation\n");
+//	printf("out allocation\n");
         out[0] = x_[optimal];
         out[1] = y_[optimal];
         out[2] = th_[optimal];
         out[3] = alpha[optimal];
         out[4] = d[optimal];
+	double R_min=L/tan(max_alpha);
+/*	if(x_goal.x==x_rand.x && x_goal.y==x_rand.y)
+	{
+            double x_c1 = x_near.x+R_min*sin(x_near.th);
+    	    double y_c1 = x_near.y-R_min*cos(x_near.th);
+	    double x_c2 = x_near.x-R_min*sin(x_near.th);
+	    double y_c2 = x_near.y+R_min*sin(x_near.th);
+        if(pow(x_goal.x-x_near.x,2)+pow(x_goal.y-x_near.y,2)<=pow(MaxStep,2) && (pow(x_c1-x_goal.x,2)+pow(y_c1-x_goal.y,2) > pow(R_min,2) && pow(x_c2-x_goal.x,2) + pow(y_c2-x_goal.y,2) > pow(R_min,2))) {
+		out[0]=x_goal.x;
+		out[1]=x_goal.y;
+		out[4]=sqrt(pow(x_rand.x-x_near.x,2)+pow(x_rand.y-x_near.y,2));
+		double R_goal=1/(1.57-atan((x_goal.y-x_near.y)/(x_goal.x-x_near.x)))*out[4];
+		out[2]=x_near.th+out[4]/R_goal;
+		out[3]=atan(R_goal/L);
+	}
+	}*/
        // if(isCollision(x_near, x_new, d[optimal], R[optimal])){
 	//	printf("isCollision \n");
                 delete [] alpha;
