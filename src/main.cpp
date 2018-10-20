@@ -33,7 +33,7 @@ double world_y_max;
 
 //parameters we should adjust : K, margin, MaxStep
 int margin = 15;
-int K = 10000;
+int K = 7000;
 double MaxStep = 2;
 
 //way points
@@ -255,7 +255,8 @@ int main(int argc, char** argv){
                 path_now.th = path_RRT[i].th;
 
 		float ctrl = pid_ctrl.get_control(robot_pose,path_now);
-		float speed=1.0;
+		float speed= 0.9 + 1/fabs(ctrl)/5;
+		if(speed>1.5) speed=1.5;
 		float max_steering = (0.45/speed + 0.25 < 1.18)? 0.45/speed + 0.25 : 1.18;
 		float steering = ctrl*max_steering/3;
 //		printf("ctrl %f \n", steering);
@@ -324,6 +325,8 @@ void generate_path_RRT()
 	point lastp=waypoints[0];
 	for(int i=0; i<waypoints.size()-1; i++){
 		printf("start %d\n",i);
+		lastp.x=waypoints[i].x;
+		lastp.y=waypoints[i].y;
 		rrtTree *tree = new rrtTree(lastp, waypoints[i+1], map, map_origin_x, map_origin_y, res, margin);
 		printf("rrtTree %d\n",i);
 		tree->generateRRT(world_x_max, world_x_min, world_y_max, world_y_min, K, MaxStep);

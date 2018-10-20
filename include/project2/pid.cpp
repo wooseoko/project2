@@ -12,9 +12,9 @@ PID::PID(){
      *
     */
 
-	Kp=2.5;
-	Ki=0.008;
-	Kd=10;
+	Kp=10.0;
+	Ki=0.01;
+	Kd=7;
 //	Ki=0;	Kd=0;
 	error = 0.0;
 	error_sum = 0.0;

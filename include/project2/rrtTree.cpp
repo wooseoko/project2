@@ -300,7 +300,7 @@ int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep)
 	
 //	printf("randompath start! \n");
     //TODO
-        int n=10;
+        int n=5;
         double *alpha = new double[n];
         double *d = new double[n];
         double *R = new double[n];
@@ -315,7 +315,7 @@ int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep)
         for(int i=0;i<n;i++){
 //		printf("i : %d\n",i);
 	        alpha[i] =( ((double)rand()/RAND_MAX)*2-1 )*max_alpha;
-                d[i] = ( (fabs((double)rand()/RAND_MAX))*0.5+0.5 )*MaxStep;
+                d[i] = ( (fabs((double)rand()/RAND_MAX))*0.35+0.65 )*MaxStep;
 //                if(i%10==0) d[i] = MaxStep;
  	//	if(count %5==0) d[i]=0;
 
