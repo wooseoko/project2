@@ -15,6 +15,7 @@ PID::PID(){
 	Kp=2.0;
 	Ki=0.005;
 	Kd=10;
+//	Ki=0;	Kd=0;
 	error = 0.0;
 	error_sum = 0.0;
 	error_diff = 0.0;
@@ -49,6 +50,7 @@ float PID::get_control(point car_pose, point goal_pose){
 	float heading_angle = atan2(car_pose.y-pre_y,car_pose.x-pre_x);
 	float pre_error=error;
 	error = angle_from_car_to_goal - heading_angle;
+	printf("heading_angle pre_error error %.2f %.2f %.2f \n",heading_angle, pre_error, error);
 	if(error<= -M_PI) error += 2*M_PI;
 	else if(error>=M_PI) error -= 2*M_PI;
 

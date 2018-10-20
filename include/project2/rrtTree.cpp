@@ -298,7 +298,7 @@ int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep)
         for(int i=0;i<n;i++){
 		printf("i : %d\n",i);
                 alpha[i] =( ((double)rand()/RAND_MAX)*2-1 )*max_alpha;
-                d[i] = fabs(( ((double)rand()/RAND_MAX)*2-1 )*MaxStep);
+                d[i] = ( (fabs((double)rand()/RAND_MAX))*0.6+0.4 )*MaxStep;
  		if(count %5==0) d[i]=0;
 
                 R[i] = L/tan(alpha[i]);
@@ -384,7 +384,7 @@ bool rrtTree::isCollision(point x1, point x2, double d, double R) {
 			for(int j=-4;j<4;j++)
 			{	
 				result &= map.at<uchar>(i+x_path/0.05+x_origin, j+y_path/0.05+y_origin);
-}
+			}
 		}
 		
 	}

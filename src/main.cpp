@@ -17,6 +17,8 @@
 #include <math.h>
 #include <pwd.h>
 
+PID pid_ctrl;
+
 //map spec
 cv::Mat map;
 double res;
@@ -32,7 +34,7 @@ double world_y_max;
 //parameters we should adjust : K, margin, MaxStep
 int margin = 15;
 int K = 3000;
-double MaxStep = 8;
+double MaxStep = 4;
 
 //way points
 std::vector<point> waypoints;
@@ -60,6 +62,8 @@ void callback_state(gazebo_msgs::ModelStatesConstPtr msgs);
 void setcmdvel(double v, double w);
 
 int main(int argc, char** argv){
+
+	int i=0;////
     ros::init(argc, argv, "rrt_main");
     ros::NodeHandle n;
 
@@ -238,22 +242,20 @@ int main(int argc, char** argv){
 
         case RUNNING: {
 	    printf("Running start \n");
-	    PID pid_ctrl;
-	    int i=0;
+	   // PID pid_ctrl;
+		while(ros::ok()){	
 	    printf("Running PID \n");
-	    while(1)
-	    {
 /*		printf("start while & i : %d\n",i);
 //		printf("look_ahead_idx %d",look_ahead_idx);
-//		printf(" path x , y , th %2f, %2f, %2f \n", path_RRT[i].x,path_RRT[i].y,path_RRT[i].th);
-		printf("robot pose x, y, th %2f, %2f, %2f\n",robot_pose.x,robot_pose.y,robot_pose.th);*/
+//		printf(" path x , y , th %2f, %2f, %2f \n", path_RRT[i].x,path_RRT[i].y,path_RRT[i].th);*/
+		printf("robot pose x, y, th %2f, %2f, %2f\n",robot_pose.x,robot_pose.y,robot_pose.th);
 		point path_now;
 		path_now.x = path_RRT[i].x;
                 path_now.y = path_RRT[i].y;
                 path_now.th = path_RRT[i].th;
 
 		float ctrl = pid_ctrl.get_control(robot_pose,path_now);
-		float speed=2.0;
+		float speed=1.0;
 		float max_steering = (0.45/speed + 0.25 < 1.18)? 0.45/speed + 0.25 : 1.18;
 		float steering = ctrl*max_steering/3;
 //		printf("ctrl %f \n", steering);
@@ -272,7 +274,12 @@ int main(int argc, char** argv){
 		    state=FINISH;
 		    break;
 		}
-	    }
+	            ros::spinOnce();
+            control_rate.sleep();
+
+	}
+		
+	
 	    //TODO
 	    /*
 		1. make control following point in the variable "path_RRT"
@@ -315,8 +322,10 @@ void generate_path_RRT()
      * 5. end
     */
 	printf("RRT\n");
+	double lastth=0;
 	for(int i=0; i<waypoints.size()-1; i++){
 		printf("start %d\n",i);
+		waypoints[i].th = lastth;
 		rrtTree *tree = new rrtTree(waypoints[i], waypoints[i+1], map, map_origin_x, map_origin_y, res, margin);
 		printf("rrtTree %d\n",i);
 		tree->generateRRT(world_x_max, world_x_min, world_y_max, world_y_min, K, MaxStep);
@@ -324,6 +333,7 @@ void generate_path_RRT()
 		tree->visualizeTree();
 		printf("tree.visualizeTree %d\n",i);
 		std::vector<traj> vec = tree->backtracking_traj();
+		lastth = vec.begin()->th;
 		printf("backtracking_traj %d\n",i);
 		std::reverse(vec.begin(),vec.end());
 		printf("reverse, begin, end %d\n",i);
@@ -361,7 +371,7 @@ void set_waypoints()
 void callback_state(gazebo_msgs::ModelStatesConstPtr msgs){
     model_states = msgs;
     for(int i; i < msgs->name.size(); i++){
-        if(std::strcmp(msgs->name[i].c_str(),"racecar") == 0){
+	    if(std::strcmp(msgs->name[i].c_str(),"racecar") == 0){
             robot_pose.x = msgs->pose[i].position.x;
             robot_pose.y = msgs->pose[i].position.y;
             robot_pose.th = tf::getYaw(msgs->pose[i].orientation);
