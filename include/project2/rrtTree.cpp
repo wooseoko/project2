@@ -106,8 +106,7 @@ void rrtTree::visualizeTree(){
 	    }
     }
     cv::namedWindow("Mapping");
-    cv::Rect imgROI((int)Res*200,(int)Res*200,(int)Res*400,(int)Res*400);
-    cv::imshow("Mapping", imgResult(imgROI));
+    cv::imshow("Mapping", imgResult);
     cv::waitKey(1);
 }
 
@@ -161,8 +160,7 @@ void rrtTree::visualizeTree(std::vector<traj> path){
 	    }
     }
     cv::namedWindow("Mapping");
-    cv::Rect imgROI((int)Res*200,(int)Res*200,(int)Res*400,(int)Res*400);
-    cv::imshow("Mapping", imgResult(imgROI));
+    cv::imshow("Mapping", imgResult);
     cv::waitKey(1);
 }
 
@@ -200,7 +198,7 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
 		while(!passed) {
 		if(idx_near!=-1) {
                 if(randompath(out, ptrTable[idx_near]->location, x_rand, MaxStep)){
-//		printf("randompath : %d\n",i);
+		printf("randompath in generateRRT: %d\n",i);
 		point x_new;
 		ptrTable[idx_near]->cnt=0;
 		x_new.x = out[0];
@@ -240,10 +238,11 @@ point rrtTree::randomState(double x_max, double x_min, double y_max, double y_mi
     point random;
     random.x=rand()%((int)x_max - (int)x_min)+x_min;
     if(random.x>x_max) random.x=x_max;
-
+//	printf("random x %f\n",random.x);
     random.y=rand()%((int)y_max - (int)y_min)+y_min;
     if(random.y>y_max) random.y=y_max;
 
+//	printf("random y %f\n",random.y);
     random.th=atan2(random.y,random.x);
     if(count%5==0) return x_goal;
     return random;
@@ -404,6 +403,7 @@ bool rrtTree::isCollision(point x1, point x2, double d, double R) {
 	double x_center = x1.x-R*sin(x1.th);
 	double y_center = x1.y+R*cos(x1.th);
 	double beta = d/R;
+	bool tmp;
 	bool result = true;
 	int x_origin = int(map_origin_x);
 	int y_origin = int(map_origin_y);
@@ -417,11 +417,14 @@ bool rrtTree::isCollision(point x1, point x2, double d, double R) {
 		{
 			for(int j=-4;j<4;j++)
 			{	
+				tmp=result;
 				result &= map.at<uchar>(i+x_path/0.05+x_origin, j+y_path/0.05+y_origin);
+				if(tmp&&!result) printf("x %f y %f\n",x_path, y_path);
 			}
 		}
 		
 	}
+	if(!result) printf("collision true\n"); else printf("collision false\n");
 	return !result;
 }
 
