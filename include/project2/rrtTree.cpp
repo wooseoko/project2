@@ -30,7 +30,7 @@ rrtTree::rrtTree(point x_init, point x_goal) {
 }
 
 rrtTree::~rrtTree(){
-    for (int i = 1; i <= count; i++) {
+    for (int i = 1; i < count; i++) {
         delete ptrTable[i];
     }
 }
@@ -183,8 +183,8 @@ void rrtTree::addVertex(point x_new, point x_rand, int idx_near, double alpha, d
 int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min, int K, double MaxStep) {
     //TODO
         for(int i=0; i<K; i++){	
-		if(!(i%100)) printf("i : %d \n ", i );
-		if(pow(ptrTable[count-1]->location.x-x_goal.x,2)+pow(ptrTable[count-1]->location.y-x_goal.y,2)<pow(0.2,2)) break;
+//		if(!(i%100)) printf("i : %d \n ", i );
+		if(pow(ptrTable[count-1]->location.x-x_goal.x,2)+pow(ptrTable[count-1]->location.y-x_goal.y,2)<pow(0.1,2)) break;
 		int passed=0;
 //		printf("i : %d\n",i);
                 point x_rand = randomState(x_max, x_min, y_max, y_min);
@@ -198,7 +198,7 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
 		while(!passed) {
 		if(idx_near!=-1) {
                 if(randompath(out, ptrTable[idx_near]->location, x_rand, MaxStep)){
-		printf("randompath in generateRRT: %d\n",i);
+//		printf("randompath : %d\n",i);
 		point x_new;
 		ptrTable[idx_near]->cnt=0;
 		x_new.x = out[0];
@@ -238,11 +238,10 @@ point rrtTree::randomState(double x_max, double x_min, double y_max, double y_mi
     point random;
     random.x=rand()%((int)x_max - (int)x_min)+x_min;
     if(random.x>x_max) random.x=x_max;
-//	printf("random x %f\n",random.x);
+
     random.y=rand()%((int)y_max - (int)y_min)+y_min;
     if(random.y>y_max) random.y=y_max;
 
-//	printf("random y %f\n",random.y);
     random.th=atan2(random.y,random.x);
     if(count%5==0) return x_goal;
     return random;
@@ -403,7 +402,6 @@ bool rrtTree::isCollision(point x1, point x2, double d, double R) {
 	double x_center = x1.x-R*sin(x1.th);
 	double y_center = x1.y+R*cos(x1.th);
 	double beta = d/R;
-	bool tmp;
 	bool result = true;
 	int x_origin = int(map_origin_x);
 	int y_origin = int(map_origin_y);
@@ -417,47 +415,44 @@ bool rrtTree::isCollision(point x1, point x2, double d, double R) {
 		{
 			for(int j=-4;j<4;j++)
 			{	
-				tmp=result;
-				result &= map.at<uchar>(i+x_path/0.05+x_origin, j+y_path/0.05+y_origin);
-				if(tmp&&!result) printf("x %f y %f\n",x_path, y_path);
+				result = result && map.at<uchar>(i+x_path/0.05+x_origin, j+y_path/0.05+y_origin);
 			}
 		}
 		
 	}
-	if(!result) printf("collision true\n"); else printf("collision false\n");
 	return !result;
 }
 
 std::vector<traj> rrtTree::backtracking_traj(){
     //TODO
-	printf("before nearestNeighbor\n");
+//	printf("before nearestNeighbor\n");
 	int near_goal = nearestNeighbor(x_goal);
-	printf("nearestNeighbor in backtracking\n");
+//	printf("nearestNeighbor in backtracking\n");
 	std::vector<traj> path;
-	printf("vector definition\n");
-	printf("near goal %d\n",near_goal);
+//	printf("vector definition\n");
+//	printf("near goal %d\n",near_goal);
 	traj nearG;
 	nearG.x =  ptrTable[near_goal]->location.x;
-	printf("ptrtable1\n");
+//	printf("ptrtable1\n");
 	
         nearG.y =  ptrTable[near_goal]->location.y;
-	printf("ptrtable1\n");
+//	printf("ptrtable1\n");
 	
         nearG.th =  ptrTable[near_goal]->location.th;
-	printf("ptrtable1\n");
+//	printf("ptrtable1\n");
 	
         nearG.alpha =  ptrTable[near_goal]->alpha;
-	printf("ptrtable1\n");
+//	printf("ptrtable1\n");
 	
         nearG.d =  ptrTable[near_goal]->d;
-	printf("ptrtable1\n");
+//	printf("ptrtable1\n");
 	
 	path.push_back(nearG);
-	printf("push_back\n");
+//	printf("push_back\n");
 	
 	int now = near_goal;
 	while(now!=0){
-		printf("while\n");
+//		printf("while\n");
 		traj trj;
 		int prt = ptrTable[now]->idx_parent;
 		trj.x = ptrTable[prt]->location.x;
