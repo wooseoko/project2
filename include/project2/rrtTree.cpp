@@ -106,7 +106,7 @@ void rrtTree::visualizeTree(){
 	    }
     }
     cv::namedWindow("Mapping");
-    cv::imshow("Mapping",imgResult);
+    cv::imshow("Mapping",imgResult)
     cv::waitKey(1);
 }
 
