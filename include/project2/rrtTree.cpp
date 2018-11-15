@@ -30,7 +30,7 @@ rrtTree::rrtTree(point x_init, point x_goal) {
 }
 
 rrtTree::~rrtTree(){
-    for (int i = 1; i <= count; i++) {
+    for (int i = 1; i < count; i++) {
         delete ptrTable[i];
     }
 }
@@ -106,8 +106,7 @@ void rrtTree::visualizeTree(){
 	    }
     }
     cv::namedWindow("Mapping");
-    cv::Rect imgROI((int)Res*200,(int)Res*200,(int)Res*400,(int)Res*400);
-    cv::imshow("Mapping", imgResult(imgROI));
+    cv::imshow("Mapping",imgResult);
     cv::waitKey(1);
 }
 
@@ -161,13 +160,11 @@ void rrtTree::visualizeTree(std::vector<traj> path){
 	    }
     }
     cv::namedWindow("Mapping");
-    cv::Rect imgROI((int)Res*200,(int)Res*200,(int)Res*400,(int)Res*400);
-    cv::imshow("Mapping", imgResult(imgROI));
+    cv::imshow("Mapping", imgResult);
     cv::waitKey(1);
 }
 
 void rrtTree::addVertex(point x_new, point x_rand, int idx_near, double alpha, double d) {
-
     //TODO
         ptrTable[count] = new node;
         ptrTable[count]->idx = count;
@@ -185,8 +182,8 @@ void rrtTree::addVertex(point x_new, point x_rand, int idx_near, double alpha, d
 int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min, int K, double MaxStep) {
     //TODO
         for(int i=0; i<K; i++){	
-		if(!(i%100)) printf("i : %d \n ", i );
-		if(pow(ptrTable[count-1]->location.x-x_goal.x,2)+pow(ptrTable[count-1]->location.y-x_goal.y,2)<pow(0.2,2)) break;
+//		if(!(i%100)) printf("i : %d \n ", i );
+		if(pow(ptrTable[count-1]->location.x-x_goal.x,2)+pow(ptrTable[count-1]->location.y-x_goal.y,2)<pow(0.1,2)) break;
 		int passed=0;
 //		printf("i : %d\n",i);
                 point x_rand = randomState(x_max, x_min, y_max, y_min);
@@ -246,6 +243,7 @@ point rrtTree::randomState(double x_max, double x_min, double y_max, double y_mi
 
     random.th=atan2(random.y,random.x);
     if(count%5==0) return x_goal;
+//    printf("x , y : %.2f %.2f \n",random.x,random.y);
     return random;
     //TOOD
 }
@@ -298,7 +296,6 @@ int rrtTree::nearestNeighbor(point x_rand) {
 
 int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep) {
 	
-//	printf("randompath start! \n");
     //TODO
         int n=5;
         double *alpha = new double[n];
@@ -328,6 +325,8 @@ int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep)
 		p[i].x = x_[i];
 		p[i].y = y_[i];
 		p[i].th = th_[i];
+//		printf(" near x near y %.2f  %.2f \n",x_near.x,x_near.y);	
+//		printf(" x y : %.2f %.2f \n",x_[i],y_[i]);
         }
 
 	
@@ -417,7 +416,7 @@ bool rrtTree::isCollision(point x1, point x2, double d, double R) {
 		{
 			for(int j=-4;j<4;j++)
 			{	
-				result &= map.at<uchar>(i+x_path/0.05+x_origin, j+y_path/0.05+y_origin);
+				result = result && map.at<uchar>(i+x_path/0.05+x_origin, j+y_path/0.05+y_origin);
 			}
 		}
 		
@@ -427,34 +426,34 @@ bool rrtTree::isCollision(point x1, point x2, double d, double R) {
 
 std::vector<traj> rrtTree::backtracking_traj(){
     //TODO
-	printf("before nearestNeighbor\n");
+//	printf("before nearestNeighbor\n");
 	int near_goal = nearestNeighbor(x_goal);
-	printf("nearestNeighbor in backtracking\n");
+//	printf("nearestNeighbor in backtracking\n");
 	std::vector<traj> path;
-	printf("vector definition\n");
-	printf("near goal %d\n",near_goal);
+//	printf("vector definition\n");
+//	printf("near goal %d\n",near_goal);
 	traj nearG;
 	nearG.x =  ptrTable[near_goal]->location.x;
-	printf("ptrtable1\n");
+//	printf("ptrtable1\n");
 	
         nearG.y =  ptrTable[near_goal]->location.y;
-	printf("ptrtable1\n");
+//	printf("ptrtable1\n");
 	
         nearG.th =  ptrTable[near_goal]->location.th;
-	printf("ptrtable1\n");
+//	printf("ptrtable1\n");
 	
         nearG.alpha =  ptrTable[near_goal]->alpha;
-	printf("ptrtable1\n");
+//	printf("ptrtable1\n");
 	
         nearG.d =  ptrTable[near_goal]->d;
-	printf("ptrtable1\n");
+//	printf("ptrtable1\n");
 	
 	path.push_back(nearG);
-	printf("push_back\n");
+//	printf("push_back\n");
 	
 	int now = near_goal;
 	while(now!=0){
-		printf("while\n");
+//		printf("while\n");
 		traj trj;
 		int prt = ptrTable[now]->idx_parent;
 		trj.x = ptrTable[prt]->location.x;
