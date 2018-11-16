@@ -3,7 +3,7 @@
 #include <ros/ros.h>
 #define PI 3.14159265358979323846
 
-double max_alpha = 0.2;
+double max_alpha = 0.25;
 double L = 0.325;
 
 rrtTree::rrtTree() {
@@ -106,11 +106,7 @@ void rrtTree::visualizeTree(){
 	    }
     }
     cv::namedWindow("Mapping");
-<<<<<<< HEAD
-    cv::imshow("Mapping",imgResult)
-=======
-    cv::imshow("Mapping", imgResult);
->>>>>>> 4b53c3adaa2200ca78f988e96c79fcff3c1fd98a
+    cv::imshow("Mapping",imgResult);
     cv::waitKey(1);
 }
 
@@ -187,7 +183,7 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
     //TODO
         for(int i=0; i<K; i++){	
 //		if(!(i%100)) printf("i : %d \n ", i );
-		if(pow(ptrTable[count-1]->location.x-x_goal.x,2)+pow(ptrTable[count-1]->location.y-x_goal.y,2)<pow(0.1,2)) break;
+		if(pow(ptrTable[count-1]->location.x-x_goal.x,2)+pow(ptrTable[count-1]->location.y-x_goal.y,2)<pow(0.12,2)) break;
 		int passed=0;
 //		printf("i : %d\n",i);
                 point x_rand = randomState(x_max, x_min, y_max, y_min);
@@ -198,6 +194,7 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
 //		printf("double out[5]\n");
 //		printf("%d \n",idx_near);
 		
+
 		while(!passed) {
 		if(idx_near!=-1) {
                 if(randompath(out, ptrTable[idx_near]->location, x_rand, MaxStep)){
@@ -218,9 +215,9 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
 		    ptrTable[idx_near]->cnt++;
 		    if(idx_near==0) {
 			idx_near=rand()%count;	
-			break;
+//			break;
 		    }
-		    if(ptrTable[idx_near]->cnt>=4)
+		    else if(ptrTable[idx_near]->cnt>=4)
 		    {
 			idx_near=ptrTable[idx_near]->idx_parent;
 //		        ptrTable[idx_near]->location.x = 10000000;
@@ -239,15 +236,25 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
 point rrtTree::randomState(double x_max, double x_min, double y_max, double y_min) {
 
     point random;
-    random.x=rand()%((int)x_max - (int)x_min)+x_min;
-    if(random.x>x_max) random.x=x_max;
+    int x_origin = int(map_origin_x);
+    int y_origin = int(map_origin_y);
 
-    random.y=rand()%((int)y_max - (int)y_min)+y_min;
-    if(random.y>y_max) random.y=y_max;
+    while(1)
+    {
+        random.x=rand()%((int)x_max - (int)x_min)+x_min;
+        if(random.x>x_max) random.x=x_max;
 
-    random.th=atan2(random.y,random.x);
-    if(count%5==0) return x_goal;
+        random.y=rand()%((int)y_max - (int)y_min)+y_min;
+        if(random.y>y_max) random.y=y_max;
+	
+        random.th=atan2(random.y,random.x);
+	if(map.at<uchar>(random.x/0.05+x_origin, random.y/0.05+y_origin))
+	{
+		break;
+	}
+    }
 //    printf("x , y : %.2f %.2f \n",random.x,random.y);
+    if(count%5==0) return x_goal;
     return random;
     //TOOD
 }
@@ -301,7 +308,7 @@ int rrtTree::nearestNeighbor(point x_rand) {
 int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep) {
 	
     //TODO
-        int n=5;
+        int n=20;
         double *alpha = new double[n];
         double *d = new double[n];
         double *R = new double[n];
@@ -316,7 +323,7 @@ int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep)
         for(int i=0;i<n;i++){
 //		printf("i : %d\n",i);
 	        alpha[i] =( ((double)rand()/RAND_MAX)*2-1 )*max_alpha;
-                d[i] = ( (fabs((double)rand()/RAND_MAX))*0.35+0.65 )*MaxStep;
+                d[i] = ( (fabs((double)rand()/RAND_MAX))*1.5+0.65 )*MaxStep;
 //                if(i%10==0) d[i] = MaxStep;
  	//	if(count %5==0) d[i]=0;
 
