@@ -3,7 +3,7 @@
 #include <ros/ros.h>
 #define PI 3.14159265358979323846
 
-double max_alpha = 0.25;
+double max_alpha = 0.24;
 double L = 0.325;
 
 rrtTree::rrtTree() {
@@ -214,10 +214,11 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
 		{
 		    ptrTable[idx_near]->cnt++;
 		    if(idx_near==0) {
-			idx_near=rand()%count;	
+			idx_near=rand()%count;
+			if(idx_near==0) break;	
 //			break;
 		    }
-		    else if(ptrTable[idx_near]->cnt>=4)
+		    else if(ptrTable[idx_near]->cnt>=2)
 		    {
 			idx_near=ptrTable[idx_near]->idx_parent;
 //		        ptrTable[idx_near]->location.x = 10000000;
@@ -254,7 +255,7 @@ point rrtTree::randomState(double x_max, double x_min, double y_max, double y_mi
 	}
     }
 //    printf("x , y : %.2f %.2f \n",random.x,random.y);
-    if(count%5==0) return x_goal;
+    if(count%4==0) return x_goal;
     return random;
     //TOOD
 }
@@ -323,7 +324,7 @@ int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep)
         for(int i=0;i<n;i++){
 //		printf("i : %d\n",i);
 	        alpha[i] =( ((double)rand()/RAND_MAX)*2-1 )*max_alpha;
-                d[i] = ( (fabs((double)rand()/RAND_MAX))*1.5+0.65 )*MaxStep;
+                d[i] = ( (fabs((double)rand()/RAND_MAX))*0.4+0.5 )*MaxStep;
 //                if(i%10==0) d[i] = MaxStep;
  	//	if(count %5==0) d[i]=0;
 
@@ -339,12 +340,17 @@ int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep)
 //		printf(" near x near y %.2f  %.2f \n",x_near.x,x_near.y);	
 //		printf(" x y : %.2f %.2f \n",x_[i],y_[i]);
         }
-
-	
         double d2 = (x_rand.x-x_[0])*(x_rand.x-x_[0]) + (x_rand.y-y_[0])*(x_rand.y-y_[0]);
         int optimal = n;
         for(int i=0;i<n;i++){
-		if(!isCollision(x_near, p[i], d[i], R[i])){
+		if(th_[i]<= -M_PI) th_[i] += 2*M_PI;
+		else if(th_[i]>=M_PI) th_[i] -= 2*M_PI;
+
+		float near_to_rand_angle = atan2(x_rand.y-x_near.y,x_rand.x-x_near.x);
+		float th_diff = near_to_rand_angle-th_[i];
+		if(th_diff<= -M_PI) th_diff += 2*M_PI;
+		else if(th_diff>=M_PI) th_diff -= 2*M_PI;
+		if(!isCollision(x_near, p[i], d[i], R[i]) && ( th_diff<3*M_PI/4 && th_diff > -3*M_PI/4) ){
                 double tmp = (x_rand.x-x_[i])*(x_rand.x-x_[i]) + (x_rand.y-y_[i])*(x_rand.y-y_[i]);
                 if(tmp < d2 ){
                         d2 = tmp;

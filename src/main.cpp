@@ -257,7 +257,7 @@ int main(int argc, char** argv){
 		float ctrl = pid_ctrl.get_control(robot_pose,path_now);
 		float speed= 0.9 + 1/fabs(ctrl)/5;
 		if(speed>1.0) speed=1.0;
-		float max_steering = (0.45/speed + 0.45 < 1.18)? 0.45/speed + 0.45 : 1.18;
+		float max_steering = (0.45/speed + 0.6 < 1.18)? 0.45/speed + 0.6 : 1.18;
 		float steering = ctrl*max_steering/3;
 //		printf("ctrl %f \n", steering);
 //		printf("error , error_sum , error_diff :  %.2f  %.2f  %.2f \n",pid_ctrl.error,pid_ctrl.error_diff,pid_ctrl.error_sum  );
