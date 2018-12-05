@@ -183,7 +183,7 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
     //TODO
         for(int i=0; i<K; i++){	
 //		if(!(i%100)) printf("i : %d \n ", i );
-		if(pow(ptrTable[count-1]->location.x-x_goal.x,2)+pow(ptrTable[count-1]->location.y-x_goal.y,2)<pow(0.12,2)) break;
+		if(pow(ptrTable[count-1]->location.x-x_goal.x,2)+pow(ptrTable[count-1]->location.y-x_goal.y,2)<pow(0.18,2)) break;
 		int passed=0;
 //		printf("i : %d\n",i);
                 point x_rand = randomState(x_max, x_min, y_max, y_min);
@@ -214,9 +214,9 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
 		{
 		    ptrTable[idx_near]->cnt++;
 		    if(idx_near==0) {
-			idx_near=rand()%count;
-			if(idx_near==0) break;	
-//			break;
+				idx_near=rand()%count;
+				if(idx_near==0) break;	
+//				break;
 		    }
 		    else if(ptrTable[idx_near]->cnt>=2)
 		    {
