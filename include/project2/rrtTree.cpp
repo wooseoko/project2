@@ -193,44 +193,47 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
 		double out[5];
 //		printf("double out[5]\n");
 //		printf("%d \n",idx_near);
-		
+		int temp=0;
 
-		while(!passed) {
-		if(idx_near!=-1) {
-                if(randompath(out, ptrTable[idx_near]->location, x_rand, MaxStep)){
-//		printf("randompath : %d\n",i);
-		point x_new;
-		ptrTable[idx_near]->cnt=0;
-		x_new.x = out[0];
-		x_new.y = out[1];
-		x_new.th = out[2];
-                double alpha = out[3];
-                double d = out[4];
-                this->addVertex(x_new, x_rand, idx_near, alpha, d);
-//		printf("addVertex : %d\n",i);
-		passed = 1;
-		}
-		else
+		while(!passed) 
 		{
-		    ptrTable[idx_near]->cnt++;
-		    if(idx_near==0) {
-				idx_near=rand()%count;
-				if(idx_near==0) break;	
-//				break;
-		    }
-		    else if(ptrTable[idx_near]->cnt>=2)
-		    {
-			idx_near=ptrTable[idx_near]->idx_parent;
-//		        ptrTable[idx_near]->location.x = 10000000;
-//			ptrTable[idx_near]->location.y = 10000000;
-		    }
-		}
-		if(!idx_near)idx_near = ptrTable[idx_near]->idx_parent;
-		//     printf("idx_near %d\n",idx_near);
-		}
-		else break;
-	    }
-        }
+			if(idx_near!=-1) 
+			{
+				if(randompath(out, ptrTable[idx_near]->location, x_rand, MaxStep))
+				{
+					point x_new;
+					ptrTable[idx_near]->cnt=0;
+					x_new.x = out[0];
+					x_new.y = out[1];
+					x_new.th = out[2];
+					double alpha = out[3];
+					double d = out[4];
+					this->addVertex(x_new, x_rand, idx_near, alpha, d);
+					passed = 1;
+				}
+				else
+				{
+					ptrTable[idx_near]->cnt++;
+					if(idx_near==0) 
+					{
+						if(ptrTable[idx_near]->cnt>100 || temp) 
+						{
+							temp=1;
+							break;
+						}
+						idx_near=rand()%count;
+						if(idx_near==0) break;	
+					}
+					else if(ptrTable[idx_near]->cnt>=2)
+					{
+						idx_near=ptrTable[idx_near]->idx_parent;
+					}
+				}
+				if(!idx_near) idx_near = ptrTable[idx_near]->idx_parent;
+			}
+			else break;
+		}	
+	}
 	return 0;
 
 }
@@ -320,44 +323,101 @@ int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep)
         double *th_ = new double[n];
 	point *p = new point[n];
 //	printf("after allocation \n");
+	int cnt=0;
+	int i=0;
+        while(1)
+		{
+			if(i==5) break;
 
-        for(int i=0;i<n;i++){
-//		printf("i : %d\n",i);
-	        alpha[i] =( ((double)rand()/RAND_MAX)*2-1 )*max_alpha;
-                d[i] = ( (fabs((double)rand()/RAND_MAX))*0.4+0.5 )*MaxStep;
-//                if(i%10==0) d[i] = MaxStep;
- 	//	if(count %5==0) d[i]=0;
+			alpha[i] =( ((double)rand()/RAND_MAX)*2-1 )*max_alpha;
 
-                R[i] = L/tan(alpha[i]);
-                x_c[i] = x_near.x - R[i]*sin(x_near.th);
-                y_c[i] = x_near.y + R[i]*cos(x_near.th);
-                x_[i] = x_c[i] + R[i]*sin(x_near.th + d[i]/R[i]);
-                y_[i] = y_c[i] - R[i]*cos(x_near.th + d[i]/R[i]);
-                th_[i] = x_near.th + d[i]/R[i];
-		p[i].x = x_[i];
-		p[i].y = y_[i];
-		p[i].th = th_[i];
+				
+			if(i==0) 
+			{
+				alpha[i]=0.000000001;
+			}
+
+			d[i] = ( (fabs((double)rand()/RAND_MAX))*0.5+0.3 )*MaxStep;
+
+			if(alpha[i]==0)
+			{
+                delete [] alpha;
+                delete [] d;
+                delete [] R;
+                delete [] x_c;
+                delete [] y_c;
+                delete [] x_;
+                delete [] y_;
+                delete [] th_;
+				delete [] p;
+				return 0;
+			}
+			R[i] = L/tan(alpha[i]);
+
+			x_c[i] = x_near.x - R[i]*sin(x_near.th);
+			y_c[i] = x_near.y + R[i]*cos(x_near.th);
+			x_[i] = x_c[i] + R[i]*sin(x_near.th + d[i]/R[i]);
+			y_[i] = y_c[i] - R[i]*cos(x_near.th + d[i]/R[i]);	
+			th_[i] = x_near.th + d[i]/R[i];
+			p[i].x = x_[i];
+			p[i].y = y_[i];
+			p[i].th = th_[i];
 //		printf(" near x near y %.2f  %.2f \n",x_near.x,x_near.y);	
 //		printf(" x y : %.2f %.2f \n",x_[i],y_[i]);
-        }
-        double d2 = (x_rand.x-x_[0])*(x_rand.x-x_[0]) + (x_rand.y-y_[0])*(x_rand.y-y_[0]);
-        int optimal = n;
-        for(int i=0;i<n;i++){
-		if(th_[i]<= -M_PI) th_[i] += 2*M_PI;
-		else if(th_[i]>=M_PI) th_[i] -= 2*M_PI;
 
-		float near_to_rand_angle = atan2(x_rand.y-x_near.y,x_rand.x-x_near.x);
-		float th_diff = near_to_rand_angle-th_[i];
-		if(th_diff<= -M_PI) th_diff += 2*M_PI;
-		else if(th_diff>=M_PI) th_diff -= 2*M_PI;
-		if(!isCollision(x_near, p[i], d[i], R[i]) && ( th_diff<3*M_PI/4 && th_diff > -3*M_PI/4) ){
-                double tmp = (x_rand.x-x_[i])*(x_rand.x-x_[i]) + (x_rand.y-y_[i])*(x_rand.y-y_[i]);
-                if(tmp < d2 ){
-                        d2 = tmp;
-                        optimal = i;
-                }
+
+
+  
+			double R1=L/tan(max_alpha);
+			double x_c1 = p[i].x+R1*sin(p[i].th);
+			double y_c1 = p[i].y-R1*cos(p[i].th);
+			double x_c2 = p[i].x-R1*sin(p[i].th);
+			double y_c2 = p[i].y+R1*sin(p[i].th);
+
+
+
+
+
+
+
+
+			float near_to_rand_angle = atan2(x_rand.y-x_near.y,x_rand.x-x_near.x);
+			float th_diff = near_to_rand_angle-th_[i];
+			if(th_diff<= -M_PI) th_diff += 2*M_PI;
+			else if(th_diff>=M_PI) th_diff -= 2*M_PI;
+
+			if(!isCollision(x_near, p[i], d[i], R[i]) && ( th_diff<3*M_PI/4 && th_diff > -3*M_PI/4)  && pow(x_c1-x_rand.x,2)+pow(y_c1-x_rand.y,2) > pow(R1,2) && pow(x_c2-x_rand.x,2) + pow(y_c2-x_rand.y,2) > pow(R1,2)) 
+			{
+                i++;
+			}
+			cnt++;
+			if(cnt==20) break;
 		}
-        }
+		if(cnt==20) 
+		{
+                delete [] alpha;
+                delete [] d;
+                delete [] R;
+                delete [] x_c;
+                delete [] y_c;
+                delete [] x_;
+                delete [] y_;
+                delete [] th_;
+				delete [] p;
+				return 0;
+		}
+		cnt=i;
+        double d2 = (x_rand.x-x_[0])*(x_rand.x-x_[0]) + (x_rand.y-y_[0])*(x_rand.y-y_[0]);
+        int optimal = cnt;
+
+        for(int i=0;i<cnt;i++){ 
+			double tmp = (x_rand.x-x_[i])*(x_rand.x-x_[i]) + (x_rand.y-y_[i])*(x_rand.y-y_[i]);            
+			if(tmp <= d2 ){                  
+				d2 = tmp;                
+				optimal = i;                
+			}		
+
+		}
 //	printf("out allocation\n");
         out[0] = x_[optimal];
         out[1] = y_[optimal];
