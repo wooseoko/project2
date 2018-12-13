@@ -12,9 +12,9 @@ PID::PID(){
      *
     */
 
-	Kp=10.0;
-	Ki=0.01;
-	Kd=7;
+	Kp=3.0;
+	Ki=0.00;
+	Kd=2.5;
 //	Ki=0;	Kd=0;
 	error = 0.0;
 	error_sum = 0.0;
@@ -47,11 +47,10 @@ float PID::get_control(point car_pose, point goal_pose){
   */  
 
 	float angle_from_car_to_goal=atan2(goal_pose.y-car_pose.y,goal_pose.x-car_pose.x);
-	float heading_angle = atan2(car_pose.y-pre_y,car_pose.x-pre_x);
+	float heading_angle = car_pose.th;//atan2(car_pose.y-pre_y,car_pose.x-pre_x);
 	float pre_error=error;
 	error = angle_from_car_to_goal - heading_angle;
-//	printf("heading_angle pre_error error %.2f %.2f %.2f \n",heading_angle, pre_error, error);
-	if(error<= -M_PI) error += 2*M_PI;
+		if(error<= -M_PI) error += 2*M_PI;
 	else if(error>=M_PI) error -= 2*M_PI;
 
 
@@ -62,11 +61,12 @@ float PID::get_control(point car_pose, point goal_pose){
 
 
 	error_sum += pre_error;
-	error_diff =  error - pre_error;
+	error_diff =  pre_error - error;
+	printf("P I D %.2f %.2f %.2f \n",Kp*error, Ki*error_sum, Kd*error_diff);
 
 	ctrl = Kp* error + Ki*error_sum + Kd*error_diff;  
-	if(ctrl>=3.0) ctrl=3.0;
-	else if(ctrl<=-3.0) ctrl=-3.0;
+	if(ctrl>=4.0) ctrl=4.0;
+	else if(ctrl<=-4.0) ctrl=-4.0;
 
 	pre_x=car_pose.x;
 	pre_y=car_pose.y;
