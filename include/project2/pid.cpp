@@ -55,14 +55,14 @@ float PID::get_control(point car_pose, point goal_pose){
 
 
 	if(sqrt(pow(car_pose.x-goal_pose.x,2)+pow(car_pose.y-goal_pose.y,2))<0.2) {
-        	reset();
+        //	reset();
 	}
 
 
 
 	error_sum += pre_error;
 	error_diff =  pre_error - error;
-	printf("P I D %.2f %.2f %.2f \n",Kp*error, Ki*error_sum, Kd*error_diff);
+//	printf("P I D %.2f %.2f %.2f \n",Kp*error, Ki*error_sum, Kd*error_diff);
 
 	ctrl = Kp* error + Ki*error_sum + Kd*error_diff;  
 	if(ctrl>=4.0) ctrl=4.0;
