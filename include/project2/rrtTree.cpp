@@ -3,7 +3,7 @@
 #include <ros/ros.h>
 #define PI 3.14159265358979323846
 
-double max_alpha = 0.30;
+double max_alpha = 0.25;
 double L = 0.325;
 
 rrtTree::rrtTree() {
@@ -27,6 +27,7 @@ rrtTree::rrtTree(point x_init, point x_goal) {
     root->alpha = 0;
     root->d = 0;
     root->cnt=0;
+	root->available=true;
 }
 
 rrtTree::~rrtTree(){
@@ -52,6 +53,10 @@ rrtTree::rrtTree(point x_init, point x_goal, cv::Mat map, double map_origin_x, d
     root->idx_parent = NULL;
     root->location = x_init;
     root->rand = x_init;
+	root->alpha=0;
+	root->d=0;
+	root->cnt=0;
+	root->available=true;
 }
 
 cv::Mat rrtTree::addMargin(cv::Mat map, int margin) {
@@ -174,6 +179,7 @@ void rrtTree::addVertex(point x_new, point x_rand, int idx_near, double alpha, d
     ptrTable[count]->alpha = alpha;
         ptrTable[count]->d = d;
 	ptrTable[count]->cnt = 0;
+	ptrTable[count]->available=true;
         count++;
 
 
@@ -183,7 +189,7 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
     //TODO
         for(int i=0; i<K; i++){	
 //		if(!(i%100)) printf("i : %d \n ", i );
-		if(pow(ptrTable[count-1]->location.x-x_goal.x,2)+pow(ptrTable[count-1]->location.y-x_goal.y,2)<pow(0.18,2)) break;
+		if(pow(ptrTable[count-1]->location.x-x_goal.x,2)+pow(ptrTable[count-1]->location.y-x_goal.y,2)<pow(0.3,2)) break;
 		int passed=0;
 //		printf("i : %d\n",i);
                 point x_rand = randomState(x_max, x_min, y_max, y_min);
@@ -216,9 +222,10 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
 					ptrTable[idx_near]->cnt++;
 					if(idx_near==0) 
 					{
-						if(ptrTable[idx_near]->cnt>100 || temp) 
+						if(ptrTable[idx_near]->cnt>30 || temp) 
 						{
 							temp=1;
+							ptrTable[0]->available = false;
 							break;
 						}
 						idx_near=rand()%count;
@@ -226,12 +233,15 @@ int rrtTree::generateRRT(double x_max, double x_min, double y_max, double y_min,
 					}
 					else if(ptrTable[idx_near]->cnt>=2)
 					{
+						ptrTable[idx_near]->available=false;
 						idx_near=ptrTable[idx_near]->idx_parent;
+						ptrTable[idx_near]->cnt++;
 					}
 				}
-				if(!idx_near) idx_near = ptrTable[idx_near]->idx_parent;
+				//if(!idx_near) idx_near = ptrTable[idx_near]->idx_parent;
 			}
 			else break;
+			if(temp) break;
 		}	
 	}
 	return 0;
@@ -258,7 +268,7 @@ point rrtTree::randomState(double x_max, double x_min, double y_max, double y_mi
 	}
     }
 //    printf("x , y : %.2f %.2f \n",random.x,random.y);
-    if(count%4==0) return x_goal;
+    if(count%5==0) return x_goal;
     return random;
     //TOOD
 }
@@ -277,7 +287,7 @@ int rrtTree::nearestNeighbor(point x_rand, double MaxStep) {
 //	if( fabs( ptrTable[i]->location.th - atan2(ptrTable[i]->location.y-x_rand.y,ptrTable[i]->location.x-x_rand.x))<1.57 ) {
 	if(pow(x_c1-x_rand.x,2)+pow(y_c1-x_rand.y,2) > pow(R,2) && pow(x_c2-x_rand.x,2) + pow(y_c2-x_rand.y,2) > pow(R,2)) {
             double tmp=pow(x_rand.x-ptrTable[i]->location.x,2)+pow(x_rand.y-ptrTable[i]->location.y,2);
-            if(tmp<min_distance)
+            if(tmp<min_distance && ptrTable[i]->available==true)
             {
                 min_distance=tmp;
                 index_min=i;
@@ -327,30 +337,20 @@ int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep)
 	int i=0;
         while(1)
 		{
-			if(i==5) break;
+			if(i==3) break;
 
 			alpha[i] =( ((double)rand()/RAND_MAX)*2-1 )*max_alpha;
-
 				
-			if(i==0) 
+			if(cnt%5==0) 
 			{
 				alpha[i]=0.000000001;
 			}
-
-			d[i] = ( (fabs((double)rand()/RAND_MAX))*0.5+0.3 )*MaxStep;
+				
+				d[i] = ( (fabs((double)rand()/RAND_MAX))*0.5+0.02)*MaxStep;
 
 			if(alpha[i]==0)
 			{
-                delete [] alpha;
-                delete [] d;
-                delete [] R;
-                delete [] x_c;
-                delete [] y_c;
-                delete [] x_;
-                delete [] y_;
-                delete [] th_;
-				delete [] p;
-				return 0;
+				alpha[i]=0.00000001;
 			}
 			R[i] = L/tan(alpha[i]);
 
@@ -391,9 +391,14 @@ int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep)
                 i++;
 			}
 			cnt++;
-			if(cnt==20) break;
+			if(cnt==40)
+			{
+//				printf(" %d \n ", i);
+				i--;
+				break;
+			}
 		}
-		if(cnt==20) 
+		if(i<=0) 
 		{
                 delete [] alpha;
                 delete [] d;

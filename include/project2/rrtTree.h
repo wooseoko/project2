@@ -26,7 +26,8 @@ private:
         int idx_parent;
 	    double alpha;
 	    double d;
-	int cnt;
+		int cnt;
+		bool available;
     }*root;
 
     int count;
