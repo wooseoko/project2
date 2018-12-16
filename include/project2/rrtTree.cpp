@@ -3,7 +3,7 @@
 #include <ros/ros.h>
 #define PI 3.14159265358979323846
 
-double max_alpha = 0.24;
+double max_alpha = 0.22;
 double L = 0.325;
 
 rrtTree::rrtTree() {
