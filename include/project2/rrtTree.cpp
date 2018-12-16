@@ -3,7 +3,7 @@
 #include <ros/ros.h>
 #define PI 3.14159265358979323846
 
-double max_alpha = 0.25;
+double max_alpha = 0.24;
 double L = 0.325;
 
 rrtTree::rrtTree() {
@@ -268,7 +268,7 @@ point rrtTree::randomState(double x_max, double x_min, double y_max, double y_mi
 	}
     }
 //    printf("x , y : %.2f %.2f \n",random.x,random.y);
-    if(count%5==0) return x_goal;
+    if(count%7==0) return x_goal;
     return random;
     //TOOD
 }
@@ -337,7 +337,7 @@ int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep)
 	int i=0;
         while(1)
 		{
-			if(i==3) break;
+			if(i==5) break;
 
 			alpha[i] =( ((double)rand()/RAND_MAX)*2-1 )*max_alpha;
 				
@@ -346,7 +346,7 @@ int rrtTree::randompath(double *out, point x_near, point x_rand, double MaxStep)
 				alpha[i]=0.000000001;
 			}
 				
-				d[i] = ( (fabs((double)rand()/RAND_MAX))*0.5+0.02)*MaxStep;
+				d[i] = ( (fabs((double)rand()/RAND_MAX))*0.5+0.1)*MaxStep;
 
 			if(alpha[i]==0)
 			{

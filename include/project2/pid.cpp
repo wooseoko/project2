@@ -12,9 +12,9 @@ PID::PID(){
      *
     */
 
-	Kp=4.0;
-	Ki=0.0;
-	Kd=0;
+	Kp=4.3;
+	Ki=0.0008;
+	Kd=2;
 //	Ki=0;	Kd=0;
 	error = 0.0;
 	error_sum = 0.0;
@@ -54,7 +54,7 @@ float PID::get_control(point car_pose, point goal_pose){
 	else if(error>=M_PI) error -= 2*M_PI;
 
 
-	if(sqrt(pow(car_pose.x-goal_pose.x,2)+pow(car_pose.y-goal_pose.y,2))<0.25) {
+	if(sqrt(pow(car_pose.x-goal_pose.x,2)+pow(car_pose.y-goal_pose.y,2))<0.35) {
         	reset();
 	}
 
@@ -67,7 +67,8 @@ float PID::get_control(point car_pose, point goal_pose){
 	ctrl = Kp* error + Ki*error_sum + Kd*error_diff;  
 	if(ctrl>=4.0) ctrl=4.0;
 	else if(ctrl<=-4.0) ctrl=-4.0;
-
+	if(ctrl>=2) ctrl=4.0;
+	if(ctrl<-2) ctrl=-4.0;
 	pre_x=car_pose.x;
 	pre_y=car_pose.y;
 	printf(" ctrl %.2f\n\n",ctrl);
